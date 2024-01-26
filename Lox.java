@@ -7,6 +7,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Scanner;
+
+public class Token {
+  int data  = 0;
+}
 
 public class Lox {
   public static void main(String[] args) throws IOException {
@@ -19,10 +24,31 @@ public class Lox {
       runPrompt();
     }
   }
+
+  private static void runFile(String path) throws IOException {
+    byte[] bytes = Files.readAllBytes(Paths.get(path));
+    run(new String(bytes, Charset.defaultCharset()));
+  }
+
+  private static void runPrompt() throws IOException {
+    InputStreamReader input = new InputStreamReader(System.in);
+    BufferedReader reader = new BufferedReader(input);
+
+    for (;;) {
+      System.out.print("> ");
+      String line = reader.readLine();
+      if (line == null) break;
+      run(line);
+    }
+  }
+
+  private static void run(String source) {
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.scanTokens();
+
+    for (Token token : tokens) {
+      System.out.println(token);
+    }
+  }
 }
 
-private static void runFile(String path) throws IOExpection {
-  byte[] bytes = Files.readAllBytes(Paths.get(path));
-  run(new String(bytes, Charset.defaultCharset()));
-  //test
-}
