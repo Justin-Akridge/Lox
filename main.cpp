@@ -1,5 +1,6 @@
 #include "Lexer.h"
 
+// todo
 namespace Lox {
 // TODO [_] use a define variable for running prompt or file
   void init_file(char **argv) {

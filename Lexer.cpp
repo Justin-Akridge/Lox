@@ -19,6 +19,7 @@ void Lexer::run_file(const std::string& path) {
   run(buffer.str());
 
   if (had_error) {
+
     exit(65);
   }
 }
