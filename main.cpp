@@ -1,4 +1,4 @@
-#include "Lexer.h"
+#include "lexer.h"
 
 // todo
 namespace Lox {
