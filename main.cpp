@@ -1,13 +1,13 @@
-#include "lexer.h"
-
+#include "util.h"
+#include <iostream>
 // todo
 namespace Lox {
 // TODO [_] use a define variable for running prompt or file
   void init_file(char **argv) {
-    Lexer::run_file(argv[1]);
+    Util::run_file(argv[1]);
   }
   void init_prompt() {
-    Lexer::run_prompt();
+    Util::run_prompt();
   }
 }
 

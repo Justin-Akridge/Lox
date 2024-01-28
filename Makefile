@@ -1,3 +1,3 @@
-make: main.cpp lexer.cpp token.cpp
-	clear && clang++ -std=c++20 main.cpp token.cpp lexer.cpp -o Lox && ./Lox && rm -f Lox
+make: main.cpp util.cpp token.cpp lexer.cpp
+	clear && clang++ -Wzero-as-null-pointer-constant -std=c++20 main.cpp lexer.cpp token.cpp util.cpp -o Lox 
 

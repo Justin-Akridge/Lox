@@ -1,65 +1,31 @@
 #pragma once
 
 #include "token-type.h"
+#include "token.h"
 #include <vector>
 #include <string>
 
-class Lexer {
-  Lexer(std::string &source) {
-    this->source = source;
-  }
+namespace Lox {
 
-  std::vector<Token> scan_tokens() {
-    while (!is_at_end()) {
-      start = current;
-      scan_token();
-    }
-    
-    tokens.emplace_back(Token(Token_Type::EOF, "", "", line));
-    return tokens;
-  }
+class Lexer {
+public:
+  Lexer(std::string source);
+  //This function starts the lexing
+  std::vector<Token> scan_tokens();
 
 private:
-  bool is_at_end() {
-    if (current >= source.size()) {
-      return true;
-    }
-    return false;
-  }
+  char peek();
+  bool match(char equal_sign);
+  char advance();
+  bool is_at_end();
+  void read_tokens();
+  void add_token(Token_Type type);
+  void add_token(Token_Type type, std::string literal);
 
-  void scan_tokens() {
-    char c = advance();
-    switch(c) {
-      case ')': add_token(Token_Type::LEFT_PARAM); break;
-      case '(': add_token(Token_Type::RIGHT_PARAM); break;
-      case '{': add_token(Token_Type::LEFT_BRACE); break;
-      case '}': add_token(Token_Type::RIGHT_BRACE); break;
-      case ',': add_token(Token_Type::COMMA); break;
-      case '.': add_token(Token_Type::DOT); break;
-      case '-': add_token(Token_Type::MINUS); break;
-      case '+': add_token(Token_Type::PLUS); break;
-      case '*': add_token(Token_Type::STAR); break;
-      case '/': add_token(Token_Type::SLASH); break;
-      case ';': add_token(Token_Type::SEMICOLON); break;
-    }
-  }
-
-  char advance() {
-    return source[current++];
-  }
-
-  void add_token(Token_Type type) {
-    add_token(type, nullptr);
-  }
-
-  void add_token(Token_Type type, const std::string& literal) {
-    std::string text = source.substr(start, current - start);
-    tokens.emplace_back(Token(type, text, literal, line));
-  }
-
-  const std::string source;
-  const std::vector<Token> tokens;
-  const int start = 0;
-  const int current = 0;
-  const int line = 1;
+  std::string source;
+  std::vector<Token> tokens;
+  int start = 0;
+  int current = 0;
+  int line = 1;
 };
+}

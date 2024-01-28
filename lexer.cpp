@@ -1,59 +1,92 @@
 #include "lexer.h"
+#include "util.h"
+#include "token-type.h"
+#include "token.h"
 #include <iostream>
-#include <fstream>
-#include <sstream>
-// TODO [_] create a reporter class for reporting errors
+#include <vector>
+#include <string>
+
 namespace Lox {
 
-bool Lexer::had_error = false;
-
-void Lexer::run_file(const std::string& path) {
-  std::ifstream file(path);
-  if (!file.is_open()) {
-    std::cerr << "Error: could not open file " << path << '\n';
-    exit(1);
-  }
-    
-  std::stringstream buffer;
-  buffer << file.rdbuf();
-  run(buffer.str());
-
-  if (had_error) {
-
-    exit(65);
-  }
+Lexer::Lexer(std::string source) {
+  this->source = source;
 }
 
-void Lexer::run_prompt() {
-  for (;;) {
-    std::cout << "> ";
-    std::string line;
-    std::getline(std::cin, line);
 
-    if (std::cin.eof()) {
+std::vector<Token> Lexer::scan_tokens() {
+  while (!is_at_end()) {
+    start = current;
+    read_tokens();
+  }
+   
+  Token new_token(Token_Type::E_O_F, "", "", line);
+  tokens.push_back(new_token);
+  return tokens;
+}
+
+bool Lexer::is_at_end() {
+  if (current >= source.size()) {
+    return true;
+  }
+  return false;
+}
+
+void Lexer::read_tokens() {
+  char c = advance();
+  switch(c) {
+    // TODO [_] parser doesn't understand '\n' character
+    case ')': add_token(Token_Type::LEFT_PARAM); break;
+    case '(': add_token(Token_Type::RIGHT_PARAM); break;
+    case '{': add_token(Token_Type::LEFT_BRACE); break;
+    case '}': add_token(Token_Type::RIGHT_BRACE); break;
+    case ',': add_token(Token_Type::COMMA); break;
+    case '.': add_token(Token_Type::DOT); break;
+    case '-': add_token(Token_Type::MINUS); break;
+    case '+': add_token(Token_Type::PLUS); break;
+    case '*': add_token(Token_Type::STAR); break;
+    case ';': add_token(Token_Type::SEMICOLON); break;
+    case '!': add_token(match('=') ? BANG_EQUAL : BANG); break;
+    case '=': add_token(match('=') ? EQUAL_EQUAL : EQUAL); break;
+    case '<': add_token(match('=') ? LESS_THAN_EQUAL : LESS_THAN); break;
+    case '>': add_token(match('=') ? GREATER_THAN_EQUAL : GREATER_THAN); break;
+    case '/': 
+      if (match('/')) {
+        while (peek() != '\n' && !is_at_end()) advance();
+      } else {
+        add_token(Token_Type::SLASH);
+      }
       break;
-    }
-    run(line);
-    had_error = false;
+    default:
+      std::cout << c << '\n';
+      Util::error(line, "Unexpected character.\n");
+      break;
   }
 }
 
-void Lexer::run(const std::string& source) {
-  Scanner scanner;
-  std::vector<Token> tokens = scanner.scan_tokens();
-
-  for (Token &token : tokens) {
-    std::cout << token.data << '\n';
-  }
+bool Lexer::match(char equal_sign) {
+  if (is_at_end()) return false;
+  if (source[current] != equal_sign) return false;
+  current++;
+  return true;
 }
 
-
-void Lexer::error(int line, std::string &message) {
-  // TODO [_] convert string to variable, pass address through reporter
-  report(line, "", message);
+char Lexer::peek() {
+  if(is_at_end()) return '\0';
+  return source[current];
 }
 
-void Lexer::report(int line, std::string where, std::string& message) {
-  std::cout << "[line " + std::to_string(line) + "] Error" + where + ": " + message;
+char Lexer::advance() {
+  return source[current++];
 }
+
+void Lexer::add_token(Token_Type type) {
+  add_token(type, "");
+}
+
+void Lexer::add_token(Token_Type type, std::string literal) {
+  std::string text = source.substr(start, current - start);
+  Token new_token(type,text,literal, line);
+  tokens.push_back(new_token);
+}
+
 }
