@@ -20,7 +20,7 @@ void Util::run_file(const std::string& path) {
   std::string buffer;
   std::string line;
   while (std::getline(file >> std::ws, line)) {
-    buffer += line;
+    buffer += line + '\n';
   }
   run(buffer);
 

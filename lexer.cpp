@@ -2,7 +2,6 @@
 #include "util.h"
 #include "token-type.h"
 #include "token.h"
-#include <iostream>
 #include <vector>
 #include <string>
 
@@ -22,6 +21,39 @@ std::vector<Token> Lexer::scan_tokens() {
   Token new_token(Token_Type::E_O_F, "", "", line);
   tokens.push_back(new_token);
   return tokens;
+}
+
+char Lexer::peek_next() {
+  if (current + 1 >= source.size()) return '\0';
+  return source[current + 1];
+}
+
+void Lexer::number() {
+  while (isdigit(peek())) advance();
+  
+  if (peek() == '.' && isdigit(peek_next())) {
+    advance();
+
+    while (isdigit(peek())) advance();
+  }
+
+  add_token(Token_Type::NUMBER, source.substr(start, current));
+}
+
+void Lexer::string() {
+  while (peek() != '"' && !is_at_end()) {
+    if (peek() == '\n') line++;
+    advance();
+  }
+
+  if (is_at_end()) {
+    Util::error(line, "Unterminated string\n");
+    return;
+  }
+
+  advance();
+  std::string value = source.substr(start + 1, current - 1);
+  add_token(Token_Type::STRING, value);
 }
 
 bool Lexer::is_at_end() {
@@ -56,9 +88,25 @@ void Lexer::read_tokens() {
         add_token(Token_Type::SLASH);
       }
       break;
+    case ' ':
+    case '\r':
+    case '\t':
+      break;
+    case '\n':
+      line++;
+      break;
+    case '"': string(); break;
+    case 'o':
+      if (match('r')) {
+        add_token(Token_Type::OR);
+      }
+      break;
     default:
-      std::cout << c << '\n';
-      Util::error(line, "Unexpected character.\n");
+      if (isdigit(c)) {
+        number();
+      } else {
+        Util::error(line, "Unexpected character.\n");
+      }
       break;
   }
 }
@@ -75,6 +123,10 @@ char Lexer::peek() {
   return source[current];
 }
 
+bool Lexer::isdigit(char c) {
+  return (c >= '0' && c <= '9');
+}
+
 char Lexer::advance() {
   return source[current++];
 }
@@ -85,7 +137,7 @@ void Lexer::add_token(Token_Type type) {
 
 void Lexer::add_token(Token_Type type, std::string literal) {
   std::string text = source.substr(start, current - start);
-  Token new_token(type,text,literal, line);
+  Token new_token(type, text, literal, line);
   tokens.push_back(new_token);
 }
 

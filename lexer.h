@@ -14,11 +14,15 @@ public:
   std::vector<Token> scan_tokens();
 
 private:
+  char peek_next();
+  void number();
+  bool isdigit(char c);
   char peek();
   bool match(char equal_sign);
   char advance();
   bool is_at_end();
   void read_tokens();
+  void string();
   void add_token(Token_Type type);
   void add_token(Token_Type type, std::string literal);
 
