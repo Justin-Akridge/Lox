@@ -4,13 +4,13 @@
 #include "token.h"
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 namespace Lox {
 
 Lexer::Lexer(std::string source) {
   this->source = source;
 }
-
 
 std::vector<Token> Lexer::scan_tokens() {
   while (!is_at_end()) {
@@ -23,9 +23,44 @@ std::vector<Token> Lexer::scan_tokens() {
   return tokens;
 }
 
+std::unordered_map<std::string, Token_Type> keywords = {
+  { "and",    AND },
+  { "class",  CLASS },
+  { "else",   ELSE },
+  { "false",  FALSE },
+  { "for",    FOR },
+  { "fun",    FUN },
+  { "if",     IF },
+  { "nil",    NIL },
+  { "or",     OR },
+  { "print",  PRINT },
+  { "return", RETURN },
+  { "super",  SUPER },
+  { "this",   THIS },
+  { "true",   TRUE },
+  { "var",    VAR },
+  { "while",  WHILE },
+};
+
+void Lexer::identifier() {
+  while (is_alpha_numeric(peek())) advance();
+  std::string text = source.substr(start, current);
+  Token_Type type = keywords[text];
+  if (type == 0) type = IDENTIFIER;
+  add_token(IDENTIFIER);
+}
+
 char Lexer::peek_next() {
   if (current + 1 >= source.size()) return '\0';
   return source[current + 1];
+}
+
+bool Lexer::isalpha(char c) {
+  return (c >= 'a' && c <= 'z' || c >= 'A' || c <= 'Z' || c == '_');
+}
+
+bool Lexer::is_alpha_numeric(char c) {
+  return isalpha(c) || isdigit(c);
 }
 
 void Lexer::number() {
@@ -36,7 +71,6 @@ void Lexer::number() {
 
     while (isdigit(peek())) advance();
   }
-
   add_token(Token_Type::NUMBER, source.substr(start, current));
 }
 
@@ -63,10 +97,10 @@ bool Lexer::is_at_end() {
   return false;
 }
 
+
 void Lexer::read_tokens() {
   char c = advance();
   switch(c) {
-    // TODO [_] parser doesn't understand '\n' character
     case ')': add_token(Token_Type::LEFT_PARAM); break;
     case '(': add_token(Token_Type::RIGHT_PARAM); break;
     case '{': add_token(Token_Type::LEFT_BRACE); break;
@@ -104,6 +138,8 @@ void Lexer::read_tokens() {
     default:
       if (isdigit(c)) {
         number();
+      } else if (isalpha(c)) {
+        identifier(); 
       } else {
         Util::error(line, "Unexpected character.\n");
       }

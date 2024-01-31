@@ -14,11 +14,14 @@ public:
   std::vector<Token> scan_tokens();
 
 private:
+  void identifier();
+  bool is_alpha_numeric(char);
   char peek_next();
   void number();
-  bool isdigit(char c);
+  bool isdigit(char);
+  bool isalpha(char);
   char peek();
-  bool match(char equal_sign);
+  bool match(char);
   char advance();
   bool is_at_end();
   void read_tokens();

@@ -22,6 +22,7 @@ void Util::run_file(const std::string& path) {
   while (std::getline(file >> std::ws, line)) {
     buffer += line + '\n';
   }
+  std::cout << buffer << std::endl;
   run(buffer);
 
   if (had_error) {
